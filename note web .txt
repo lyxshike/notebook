@@ -1,0 +1,16 @@
+RandomAccessFile类的用法:      http://blog.csdn.net/czplplp_900725/article/details/37809579
+
+mianshi   http://blog.csdn.net/lom9357bye/article/details/48895987
+struts.devMode
+
+为什么要有getset方法呢， 而不是把变量设置为public的
+http://blog.csdn.net/llittlebird001/article/details/52725245
+
+为什么抽象的方法不能是静态的呢？？
+静态方法主要主为了便于调用，可以不过创建实例对象而通过类来访问
+抽象方法没有方法体，直接通过类去调用没有意义
+
+method="{1}"
+
+大话设计模式
+
