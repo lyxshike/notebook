@@ -1,0 +1,131 @@
+WEB 监听器的用途
+1.	统计在线人数和在线用户
+2.	系统启动时加载初始化信息
+3.	统计网站访问量
+4.	跟spring结合
+
+
+监听器，过滤器，Servlet加载顺序
+
+监听器 >>  过滤器  >>  Servlet
+
+
+
+监听器分类:
+1.按监听器的对象划分：
+a 用户监听应用程序环境对象(ServletContext)的时间监听器
+b 用于监听用户会话对象(HttpSession)的事件监听器
+c 用于监听请求消息对象(ServletRequest)的事件监听器。
+2.按事件划分
+a 监听域对象自身的创建和销毁的事件监听器
+        ServletContextListener,  HttpSessionListener,    ServletRequestListener
+b 监听域对象中的属性的增加和删除的事件监听器
+  ServletContextAttributeListener, HttpSessionAttributeListener, ServletRequestAttributeListener
+c 监听绑定到HttpSession域中的某个对象的状态的事件监听器
+
+
+ServletContext的创建和销毁
+实现ServletContextListener接口用于监听它的创建和销毁事件
+一个项目中可以有多个ServletContextListener，但是只有一个ServletContext对象
+
+有两个事件处理方法：
+（1）contextInitialized方法：
+public void contextInitialized( ServletContextEvent sce )
+ServletContext创建时调用
+参数 ServletContextEvent 事件对象，可以获取ServletContext对象以及一些初始化参数
+
+例如：
+1.获取ServletContext对象： ServletContext sc = sce.getServletContext();
+获取初始化参数：sc.getInitParmeter("参数名称");
+初始化参数在web.xml中配置：
+<context-param>
+<param-name>initParam</param-name>
+<param-value>imooc</param-value>
+</context-param>
+2.设置ServletContext属性：sc.setAttribute("name",obj);
+然后在其它地方获取getAttribute("name")
+
+（2）contextDestroyed方法：
+public void contextDestroyed( ServletContextEvent sce )
+ServletContext销毁时调用
+主要用于数据库链接关闭时释放一些资源，以免过度的占用。
+
+
+
+HttpSession的创建和销毁
+
+实现HttpSessionListener接口用于监听它的创建和销毁事件
+一个HttpSession可以注册多个HttpSessionListener接口，
+一个web应用中可以有多个HttpSession对象	
+有两个事件处理方法：	
+sessionCreated方法：
+public void sessionCreated(HttpSessionEvent se)
+session创建时调用
+sessionDestroyed方法：
+public void sessionDestroyed(HttpSessionEvent se)
+session销毁时调用
+
+HttpSessionListener的主要用途：
+统计在线人数
+记录访问日志，记录访问时间、访问的ip
+
+/**
+* 销毁session
+* 1.关闭服务器
+* 2.关闭浏览器
+* 3.不关闭浏览器,session超时
+*/
+
+不关闭浏览器，session超时
+可以在web.xml配置session超时的时间
+<session-config>
+<session-timeout>0</session-timeout>
+</session-config>
+0：session没有超时的限制
+1：session超时1分钟后销毁，但是并不是准确的一分钟
+
+
+
+ServletRequest的创建和销毁
+实现ServletRequestListener接口用于监听它的创建和销毁事件
+一个ServletRequest可以注册多个ServletRequestListener接口，
+有两个事件处理方法：	
+requestInitialized方法：
+public void requestInitialized(ServletRequestEvent sre)
+request创建时调用
+参数ServletRequestEvent可以获取ServletRequest对象 ServletRequest sr = sre.getServletRequest()
+进而获取初始化参数：sr.getInitParmeter("")
+requestDestroyed方法：
+public void requestDestroyed(ServletRequestEvent sre)
+request销毁时调用	
+
+ServletRequest的主要用途：
+读取参数
+记录访问历史
+
+request监听的是用户的每一个访问请求
+
+Ps：别忘了监听器的web设置。
+
+
+
+监听域对象中的属性的增加和删除的事件监听器
+ServletContext、HttpSession、ServletRequest对象的中属性的增加和删除有单独的事件监听器
+
+包括下面三个方法。。
+attributeAdded()
+attributeRemoved()
+attributeReplaced()
+
+
+监听器绑定到HttpSession域中的某个对象的状态事件监听器；
+2、HttpSession中的对象状态：
+（1）绑定：通过setAttribute();
+（2）解除绑定：removeAttribute();
+（3）钝化：将session对象序列化到存储设备上
+（4）活化：将session对象从存储设备上进行恢复
+3、session钝化机制：
+（1）把服务器中不常使用的session对象暂时的序列化到系统文件或是数据库中，当使用时反序列化到内存中，整个过程有服务器自动完成。
+（2）session的钝化机制由SessionManager管理
+4、实现绑定和解除绑定，创建一个【普通的javabean】绑定和解除绑定需实现【HttpSessionBindingListener】接口；
+实现钝化和活化，需实现HttpSessionActivationListener接口和Serializable接口
