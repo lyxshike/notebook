@@ -2,7 +2,7 @@ Java 过滤器
 
 过滤器一般用于登录权限验证、资源访问权限控制、敏感词汇过滤、字符编码转换等等操作，便于代码重用，不必每个servlet中还要进行相应的操作
 
-实现Filter接口。 虽然其中有， init(), destroy(), doFilter()三个方法，但是只用实现doFilter()就好了
+实现javax.servlet包的Filter接口。 虽然其中有， init(), destroy(), doFilter()三个方法，但是只用实现doFilter()就好了
 
 在doFilter（）方法中，chain.doFilter()前的一般是对request执行的过滤操作，chain.doFilter后面的代码一般是对response执行的操作
 
