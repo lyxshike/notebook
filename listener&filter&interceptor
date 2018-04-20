@@ -1,0 +1,17 @@
+filter
+      实现javax.servlet包的Filter接口。 虽然其中有， init(), destroy(), doFilter()三个方法。
+      过滤器一般用于登录权限验证、资源访问权限控制、敏感词汇过滤、字符编码转换等等操作，便于代码重用，不必每个servlet中还要进行相应的操作
+      
+
+Listener
+       ServletContext, httpsession, ServletRequest
+       1. ServletContextListener,  HttpSessionListener, ServletRequestListener
+       2. ServletAttributeListener, HttpSessionAttributeListener, ServletRequestAttributeListener
+       3. httpsession --->  User类 implements HttpSessionBindingListener 
+                            User类 implements HttpSessionActivationListener, Serializable
+        
+
+Inteceptor
+       不是配置在web.xml中的
+       springMVC 拦截器，   struts2 拦截器
+       拦截器类似于AOP这样的，切面切入的。  比如，日志处理等，权限检查， 性能监控
