@@ -1,0 +1,156 @@
+主键的生成策略分为4种
+     native, identity, sequence, uuid
+
+  xml的用法省略了
+     注解的方法:
+     @GenerateValue,   相当于native.
+     @GeneratedValue(strategy=GenerationType.IDENTITY)   identity
+ ~~~
+     @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="teacherSEQ")  注解在主键上 
+     @SequenceGenerator(name="teacherSEQ", sequenceName="teacherSEQ_DB")       注解在类上
+ ~~
+    @GeneratedValue(generator="iduuid")        注解在主键上
+	@GenericGenerator(name = "iduuid" ,strategy="uuid")  跟着上面，或者注解在类上
+ 
+ 
+ 
+ 联合主键，分两种形式。
+    student,  xml
+    teacher,   注解
+   (自定义注解， 在hibernate-config中用 mapping-class..
+    xml,  在hibernate-config中用mapping-resources)
+    
+注解有3种方式
+    1.   @Embeded,   @Id
+    2.   @EmbededId
+    3.   @IdClass    @Id    @Id
+
+
+为什么主键类需要实现serlialize()接口呢?
+     1.  服务器集群， 到时候可能要将一个硬盘上的数据迁移到另一个硬盘上， 不实现这个接口， 怎么迁移呢？？？
+     2.  虚拟内存，  需要硬盘的一块空间暂时来充当内存，放在虚拟内存上的对象要不要实现这个接口呢？？
+
+为什么要求主键类实现euqlas方法和hascode方法呢？
+       数据库区分两行记录是靠主键来完成的， 这些对象放到内存中怎么区分呢， 还不是equlas方法和hashcode方法。。。
+
+
+
+
+
+三种状态的删除。
+    1.瞬时状态：
+              控制台没有任何sql语句打出来. 但是， 可以成功删除自己设定id的transient对象（数据库有对应记录）  
+    2.持久状态:
+     session,databse， 中都有。。
+    3.托管状态
+            正常执行， 先select去数据库，然后在调用delete语句    
+            
+2中获取
+    1.	不存在对应记录时表现不一样
+    2.	load返回的是代理对象，等到真正用到对象的内容时才发出sql语句
+    3.	get直接从数据库加载，不会延迟
+               
+        Load :   org.hibernate.proxy.pojo.javassist.JavassistLazyInitializer  
+                 class coreAPI.TeacherD_$$_jvst790_3    
+
+update
+    1. 瞬时状态，   update的时候会报错。   但是， 可以成功更新自己设定id的transient对象（数据库有对应记录）  
+    2. 托管状态，  就会将托管状态转化为持久状态，update到数据库中去。
+    3. 持久状态，  正常update。
+    
+         控制台的sql语句中只更新我们想要更新的语句。
+        1)	使用xml中的dynamic-update  
+         2) HQL, Query
+     
+saveOrUpdate  
+        什么时候调用save，什么时候调用update自己动手做实验
+        
+Clear
+          无论是load还是get,都会首先査找缓存（一级缓存)，如果没有，才会去数据库査找，调用clear()方法可以强制清除session缓存
+
+flush
+         可以强制进行从内存到数据库的同步
+         
+     
+      
+      
+      one2one_uni_fk
+      Husband内有wife的引用
+      wife引用的get方法上配置@OneToOne
+      @JoinColumn, 可以改变此属性在数据库的名字
+
+one2one_bi_fk
+       WifeB类中也有HusbandB的引用
+                在WifeB类的gethusbandB()上配置@OneToOne(mappedBy="wifeB")
+       mappedby, 双向的依赖关系由谁来维护， wifeB是HubbandB类中的属性
+                  规律:  凡是双向关联，必设mappedBy
+           
+在数据库中一对一的单向和双向是没有区别的。。。。
+
+one2one_uni_pk(不常用)
+       HusbandUP内有WifeUP的引用
+       @OneToOne
+       @PrimaryKeyJoinColumn(这个有bug，所以得用xml来配 如下：)
+        <one-to-one name="wifeUP" constrained="true"></one-to-one>
+             <generator class="foreign">
+	            <param name="property">wifeUP</param>
+	         </generator> 
+	    
+one2one_bi_pk(不常用)
+        wifeBP中也有HusbandBP的引用
+        @OneToOne
+        @PrimaryKeyJoinColumn(这个有bug，所以得用xml来配 如下：)
+         <one-to-one name="husbandBP" property-ref="wifeBP"></one-to-one> 
+         
+one2one_uni_fk_composite
+         WifeUFC写下面的内容
+             @IdClass(WifePK.class)
+             @Id
+             @Id
+         HusbandUFC内写
+             WifeUFC的引用上写 @OneToOne
+                                 如果要更改数据库自动生成的wifeUFC的两个主键的名字， 需要配下面的东西  
+                   @JoinColumns(
+    	                   	{
+    		            	@JoinColumn(name="wifeId", referencedColumnName="id"),	
+    			            @JoinColumn(name="wifeName", referencedColumnName="name")	
+    		                 }
+                   )      
+                   
+component
+                   一个类是另一个类的一部分，  2个类在数据库中只生成一张表。
+                   添加@Component注解，在 HusbandC中WifeC的引用上
+        XML 配置入如下：
+            <component name="wifeC">
+                <property name="wifeName"/>
+                <property name="age"/>
+            </component>  
+        
+many2one_uni
+                     多方拥有一方的引用。
+         @ManyToOne, 加在User类中group的引用上。
+            xml配置的话，如下      
+           <many-to-one one="group" column="groupId"/>
+           
+one2many_uni
+                  一方拥有多方的set集合的引用
+       @OneToMany
+       @JointColumn
+                         加上@JoinitColumn之后， hibernate就不会让数据库默认生成第三张表了。。。
+         xml配置如下: 
+         <set name="user1">
+             <key column="groupId"/>
+             <one-to-many class="one2many_uni.User1"/>
+         </set>                  
+ one2many_many2one
+          @OneToMany(mappedBy="groupMO")
+
+          @ManyToOne
+many2many_uni
+         @ManyToMany
+	     @JoinTable(name="t_s",
+	        joinColumns={@JoinColumn(name="tid")},
+	        inverseJoinColumns={@JoinColumn(name="sid")}
+	     )
+ many2many_bi
+                      在另一个类的引用上添加@ManyToMany                      
