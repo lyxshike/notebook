@@ -1,8 +1,8 @@
 	private List<String> list;
 	private Map<String, Integer> map;
 	private Set<String> set;
-  private Properties properties;
-  
+        private Properties properties;
+        private String[] array;
 
   <property name = "list" >
             <list>
@@ -38,4 +38,13 @@
               <prop key="jdbcUrl">jdbc:mysql://test</prop>
               <prop key="deiverClass">com.mysql.jdbc.Driver</prop>
           </props>
+</property>
+
+
+<property name="array">
+          <array> 
+	       <value>"AAA"</value> 
+	       <value>"BBB"</value> 
+	       <value>"CCC"</value> 
+          </array>  
 </property>
