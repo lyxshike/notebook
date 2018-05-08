@@ -1,0 +1,209 @@
+HibernateOne2Many
+
+        public class Student implements Serializable{ 
+ 	           private int sid; 
+ 	           private String sname; 
+ 	           private String sex;
+              .........
+         }
+
+        public class Grade implements Serializable{ 
+            	private int gid; 
+	            private String gname; 
+            	private String gdesc; 
+ 	            //在一方定义一个多方的集合 
+ 	            private Set<Student> students =new HashSet<Student>(); 
+              ............
+         }
+
+      ~~~~~~~~~~~~~~~~~~~~~~~~~Grade.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             <set name="students" table="student"> 
+               <!-- 指定关联的外键列 --> 
+               <key column="gid"></key> 
+                <one-to-many class="com.imooc.entity.Student"/>  
+             </set> 
+
+
+HibernateMany2One
+
+        public class Student implements Serializable{ 
+ 	           private int sid; 
+ 	           private String sname; 
+ 	           private String sex;
+             private Grade grade;
+             .................
+        }
+        
+         public class Grade implements Serializable{ 
+            	private int gid; 
+	            private String gname; 
+            	private String gdesc; 
+              ............
+         }
+         
+         ~~~~~~~~~~~~~~~~~~~~~~~~~Student.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+           <many-to-one name="grade" class="com.imooc.entity.Grade" column="gid"/>
+           
+
+HibernateManyAndOne
+         
+         public class Student implements Serializable{ 
+ 	           private int sid; 
+ 	           private String sname; 
+ 	           private String sex;
+             private Grade grade;
+             .................
+        }   
+        
+         public class Grade implements Serializable{ 
+            	private int gid; 
+	            private String gname; 
+            	private String gdesc; 
+              private Set<Student> studentSet = new HashSet<Student>();
+              ............
+         } 
+
+        ~~~~~~~~~~~~~~~~~~~~~~~~~Grade.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             <set name="students" table="student" inverse="false" cascade="all"> 
+               <!-- 指定关联的外键列 --> 
+               <key column="gid"></key> 
+                <one-to-many class="com.imooc.entity.Student"/>  
+             </set> 
+     
+        ~~~~~~~~~~~~~~~~~~~~~~~~~Student.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+           <many-to-one name="grade" class="com.imooc.entity.Grade" column="gid"/>
+           
+           
+ HibernateManyAndMany(Course, Student)
+      
+             public class Course { 
+ 	                 private int cid; 
+ 	                 private String cname; 
+ 	                 private Set<Student> studentSet = new HashSet<Student>();  
+                   .......
+              }
+              
+              public class Student implements Serializable{ 
+                  	private int sid; 
+                  	private String sname; 
+	                  private Set<Course> courseSet = new HashSet<Course>(); 
+                    ......
+              }
+              
+          ~~~~~~~~~~~~~~~~~~~~~~~~~Course.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      
+                <set name="studentSet" table="student_course"> 
+                      <key column="c_id"></key> 
+                      <many-to-many column="s_id" class="com.imooc.entity.Student"></many-to-many> 
+                </set> 
+                
+          ~~~~~~~~~~~~~~~~~~~~~~~~~Student.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+                <set name="courseSet" table="student_course"> 
+                       <key column="s_id"></key> 
+                       <many-to-many class="com.imooc.entity.Course" column="c_id"></many-to-many> 
+                </set> 
+
+ 
+ HibernateOne2OneForeign
+  
+                public class IdCard { 
+                     	private int id; 
+                    	private String cardNo; 
+                      ......
+                 }
+                 
+                 public class Person { 
+	                    private int id; 
+	                    private String name; 
+	                    private IdCard idCard; 
+                      ......
+                  }
+                  
+           ~~~~~~~~~~~~~~~~~~~~~~~~~Person.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      
+               <!-- 跟多对一一样，只是增加了一个unique属性，这样就制定了这端唯一了  -->
+               <many-to-one name="idCard" column="cardId" unique="true"></many-to-one>
+
+
+HibernateOneAndOneForeign
+
+               public class IdCard { 
+                     	private int id; 
+                    	private String cardNo; 
+                      private Person person
+                      ......
+                 }
+            
+                public class Person { 
+	                    private int id; 
+	                    private String name; 
+	                    private IdCard idCard; 
+                      ......
+                  }
+                  
+             ~~~~~~~~~~~~~~~~~~~~~~~~~IdCard.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      
+                <one-to-one name="person" property-ref="idCard" class="oneAndoneForeign.entity.Person"></one-to-one>
+                
+              ~~~~~~~~~~~~~~~~~~~~~~~~~Person.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      
+                  <!-- 跟多对一一样，只是增加了一个unique属性，这样就制定了这端唯一了  -->
+                  <many-to-one name="idCard" column="cardId" unique="true"></many-to-one> 
+                     
+        
+HibernateOne2OnePrimary
+                  
+                 public class IdCard { 
+                     	private int id; 
+                    	private String cardNo; 
+                      ......
+                 }
+                 
+                 public class Person { 
+	                    private int id; 
+	                    private String name; 
+	                    private IdCard idCard; 
+                      ......
+                  }
+                  
+             ~~~~~~~~~~~~~~~~~~~~~~~~~Person.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+									<hibernate-mapping> 
+											 <class name="one2onePrimary.entity.Person" table = "person"> 
+												<id name="id" column="id" type="java.lang.Integer"> 
+													<generator class="foreign"> 
+													  <param name="property">idCard</param> 
+													</generator>  <!--//当前主键最大值+1 --> 
+												 </id>     
+												 <property name="name" column="name" type="java.lang.String" ></property> 
+												 <one-to-one name="idCard" constrained="true"></one-to-one> 
+											  </class> 
+									 </hibernate-mapping> 
+ 
+ HibernateOneAndOnePrimary
+ 
+                 public class IdCard { 
+                     	private int id; 
+                    	private String cardNo; 
+                      private Person person;
+                      ......
+                 }
+                 
+                 public class Person { 
+	                    private int id; 
+	                    private String name; 
+	                    private IdCard idCard; 
+                      ......
+                  }
+                  
+              ~~~~~~~~~~~~~~~~~~~~~~~~~IdCard.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+                <one-to-one name="person"></one-to-one>
+                
+
+             ~~~~~~~~~~~~~~~~~~~~~~~~~Person.hbm.xml~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+									<hibernate-mapping> 
+											 <class name="one2onePrimary.entity.Person" table = "person"> 
+												<id name="id" column="id" type="java.lang.Integer"> 
+													<generator class="foreign"> 
+													  <param name="property">idCard</param> 
+													</generator>  <!--//当前主键最大值+1 --> 
+												 </id>     
+												 <property name="name" column="name" type="java.lang.String" ></property> 
+												 <one-to-one name="idCard" constrained="true"></one-to-one> 
+											  </class> 
+									 </hibernate-mapping> 
